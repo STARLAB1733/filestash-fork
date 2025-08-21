@@ -47,7 +47,7 @@ require (
 	golang.org/x/time v0.8.0
 	google.golang.org/api v0.210.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
-	gopkg.in/src-d/go-git.v4 v4.13.1
+	<!-- gopkg.in/src-d/go-git.v4 v4.13.1 -->
 	modernc.org/sqlite v1.30.0
 	storj.io/uplink v1.13.0
 )

@@ -14,7 +14,7 @@ import (
 	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_dropbox"
 	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_ftp"
 	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_gdrive"
-	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_git"
+	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_git"
 	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_ldap"
 	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_local"
 	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_mysql"
