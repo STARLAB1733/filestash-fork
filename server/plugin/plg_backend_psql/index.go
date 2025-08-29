@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"io"
+	"strings"
 
 	. "github.com/mickael-kerjean/filestash/server/common"
 
@@ -44,10 +44,11 @@ func (this PSQL) Init(params map[string]string, app *App) (IBackend, error) {
 		Log.Debug("plg_backend_psql::init err=%s", err.Error())
 		return nil, ErrNotValid
 	}
-	return PSQL{
+	backend := &PSQL{
 		db:  db,
 		ctx: app.Context,
-	}, nil
+	}
+	return backend, nil
 }
 
 func withDefault(val string, def string) string {
@@ -99,28 +100,21 @@ func (this PSQL) LoginForm() Form {
 	}
 }
 
-func (this PSQL) Touch(path string) error { // TODO
-	this.db.Close()
-	return ErrNotImplemented
-}
-
-func (this PSQL) Save(path string, file io.Reader) error { // TODO
-	this.db.Close()
-	return ErrNotImplemented
-}
-
-func (this PSQL) Rm(path string) error { // TODO
-	this.db.Close()
-	return ErrNotImplemented
+func (this PSQL) Touch(path string) error {
+	defer this.Close()
+	if !strings.HasSuffix(path, ".form") {
+		return NewError("Create a form file instead. eg: xxxx.form", 403)
+	}
+	return nil
 }
 
 func (this PSQL) Mkdir(path string) error {
-	this.db.Close()
+	defer this.Close()
 	return ErrNotValid
 }
 
 func (this PSQL) Mv(from string, to string) error {
-	this.db.Close()
+	defer this.Close()
 	return ErrNotValid
 }
 
@@ -128,21 +122,21 @@ func (this PSQL) Meta(path string) Metadata {
 	location, _ := getPath(path)
 	return Metadata{
 		CanCreateDirectory: NewBool(false),
-		CanCreateFile: func(l Location) *bool {
+		CanCreateFile: func(l LocationRow) *bool {
 			if l.table == "" {
 				return NewBool(false)
 			}
 			return NewBool(true)
 		}(location),
 		CanRename: NewBool(false),
-		CanDelete: func(l Location) *bool {
+		CanDelete: func(l LocationRow) *bool {
 			if l.table == "" {
 				return NewBool(false)
 			}
 			return NewBool(true)
 		}(location),
 		CanMove: NewBool(false),
-		CanUpload: func(l Location) *bool {
+		CanUpload: func(l LocationRow) *bool {
 			if l.row == "" {
 				return NewBool(false)
 			}
@@ -151,4 +145,9 @@ func (this PSQL) Meta(path string) Metadata {
 		RefreshOnCreate: NewBool(true),
 		HideExtension:   NewBool(true),
 	}
+}
+
+func (this PSQL) Close() error {
+	this.db.Close()
+	return nil
 }
