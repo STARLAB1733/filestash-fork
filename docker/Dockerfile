@@ -6,8 +6,6 @@ ARG GIT_BRANCH=master
 RUN git clone --depth 1 --single-branch --branch ${GIT_BRANCH} ${GIT_REPO}
 # Overwrite the repo's go.mod (like package.json)
 COPY go.mod /home/filestash/go.mod
-# Remove the git backend plugin
-RUN rm -rf /home/filestash/server/plugin/plg_backend_git
 # Overwrite the repo's index.go (to register plugins)
 COPY index.go /home/filestash/server/plugin/index.go
 
