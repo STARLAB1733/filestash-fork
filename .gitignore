@@ -19,6 +19,7 @@ package-lock.json
 *_test.go
 cover.*
 www
+.gitignore
 
 
 # frontend
@@ -29,3 +30,7 @@ public/package.json
 public/README.org
 
 filestash-enterprise
+
+.vscode
+*.br
+*.gz
