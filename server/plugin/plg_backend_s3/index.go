@@ -51,11 +51,22 @@ func (this S3Backend) Init(params map[string]string, app *App) (IBackend, error)
 			region = "auto"
 		}
 	}
+
+	accessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
+	if accessKeyID == "" {
+		accessKeyID = params["access_key_id"]
+	}
+
+	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	if secretAccessKey == "" {
+		secretAccessKey = params["secret_access_key"]
+	}
+
 	creds := []credentials.Provider{}
-	if params["access_key_id"] != "" || params["secret_access_key"] != "" {
+	if accessKeyID != "" || secretAccessKey != "" {
 		creds = append(creds, &credentials.StaticProvider{Value: credentials.Value{
-			AccessKeyID:     params["access_key_id"],
-			SecretAccessKey: params["secret_access_key"],
+			AccessKeyID:     accessKeyID,
+			SecretAccessKey: secretAccessKey,
 			SessionToken:    params["session_token"],
 		}})
 	}
@@ -78,8 +89,13 @@ func (this S3Backend) Init(params map[string]string, app *App) (IBackend, error)
 		S3ForcePathStyle:              aws.Bool(true),
 		Region:                        aws.String(region),
 	}
-	if params["endpoint"] != "" {
-		config.Endpoint = aws.String(params["endpoint"])
+
+	endpointUrl := os.Getenv("AWS_ENDPOINT_URL")
+	if endpointUrl == "" {
+		endpointUrl = params["endpoint"]
+	}
+	if endpointUrl != "" {
+		config.Endpoint = aws.String(endpointUrl)
 	}
 	var timeout time.Duration
 	if secs, err := strconv.Atoi(params["timeout"]); err == nil {
@@ -103,82 +119,41 @@ func (this S3Backend) Init(params map[string]string, app *App) (IBackend, error)
 }
 
 func (this S3Backend) LoginForm() Form {
-	return Form{
+	form := Form{
 		Elmnts: []FormElement{
-			FormElement{
+			{
 				Name:  "type",
 				Type:  "hidden",
 				Value: "s3",
 			},
-			FormElement{
-				Name:        "access_key_id",
-				Type:        "text",
-				Placeholder: "Access Key ID*",
-			},
-			FormElement{
-				Name:        "secret_access_key",
-				Type:        "password",
-				Placeholder: "Secret Access Key*",
-			},
-			FormElement{
-				Name:        "advanced",
-				Type:        "enable",
-				Placeholder: "Advanced",
-				Target: []string{
-					"s3_region", "s3_endpoint", "s3_role_arn", "s3_session_token",
-					"s3_path", "s3_encryption_key", "s3_number_thread", "s3_timeout",
-				},
-			},
-			FormElement{
-				Id:          "s3_region",
-				Name:        "region",
-				Type:        "text",
-				Placeholder: "Region",
-			},
-			FormElement{
-				Id:          "s3_endpoint",
-				Name:        "endpoint",
-				Type:        "text",
-				Placeholder: "Endpoint",
-			},
-			FormElement{
-				Id:          "s3_role_arn",
-				Name:        "role_arn",
-				Type:        "text",
-				Placeholder: "Role ARN",
-			},
-			FormElement{
-				Id:          "s3_session_token",
-				Name:        "session_token",
-				Type:        "text",
-				Placeholder: "Session Token",
-			},
-			FormElement{
-				Id:          "s3_path",
-				Name:        "path",
-				Type:        "text",
-				Placeholder: "Path",
-			},
-			FormElement{
-				Id:          "s3_encryption_key",
-				Name:        "encryption_key",
-				Type:        "text",
-				Placeholder: "Encryption Key",
-			},
-			FormElement{
-				Id:          "s3_number_thread",
-				Name:        "number_thread",
-				Type:        "text",
-				Placeholder: "Num. Thread",
-			},
-			FormElement{
-				Id:          "s3_timeout",
-				Name:        "timeout",
-				Type:        "number",
-				Placeholder: "List Object Timeout",
-			},
 		},
 	}
+
+	if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
+		form.Elmnts = append(form.Elmnts, FormElement{
+			Name:        "secret_access_key",
+			Type:        "password",
+			Placeholder: "Secret Access Key*",
+		})
+	}
+
+	if os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
+		form.Elmnts = append(form.Elmnts, FormElement{
+			Name:        "access_key_id",
+			Type:        "text",
+			Placeholder: "Access Key ID*",
+		})
+	}
+
+	if os.Getenv("AWS_ENDPOINT_URL") == "" {
+		form.Elmnts = append(form.Elmnts, FormElement{
+			Name:        "endpoint",
+			Type:        "text",
+			Placeholder: "Endpoint",
+		})
+	}
+
+	return form
 }
 
 func (this S3Backend) Meta(path string) Metadata {
