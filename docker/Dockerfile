@@ -48,7 +48,11 @@ RUN set -eux; \
 COPY --from=builder_backend /home/filestash/dist/ .
 
 # libsharpyuv is not packaged for UBI distributions
-COPY --from=builder_backend /usr/lib/x86_64-linux-gnu/libsharpyuv.so.0 /usr/lib64/ 
+COPY --from=builder_backend /usr/lib/x86_64-linux-gnu/libsharpyuv.so.0 /usr/lib64/
+
+COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+COPY docker/default-config.json /app/default-config.json
 
 RUN useradd -u 1001 filestash; \
     mkdir -p /app/data; \
@@ -61,4 +65,4 @@ RUN useradd -u 1001 filestash; \
 
 USER 1001:0
 EXPOSE 8334
-CMD ["/app/filestash"]
+ENTRYPOINT ["/app/entrypoint.sh"]
