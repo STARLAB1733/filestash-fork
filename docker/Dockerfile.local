@@ -4,7 +4,7 @@ WORKDIR /home/filestash/
 COPY . .
 RUN apt-get update > /dev/null && \
     apt-get install -y curl make > /dev/null 2>&1 && \
-    apt-get install -y libjpeg-dev libtiff-dev libpng-dev libwebp-dev libraw-dev libheif-dev libgif-dev libvips-dev > /dev/null 2>&1
+    apt-get install -y libjpeg-dev libtiff-dev libpng-dev libwebp-dev libraw-dev libheif-dev libvips-dev > /dev/null 2>&1
 
 RUN make init && \
     make build && \
@@ -18,18 +18,12 @@ WORKDIR /app
 
 RUN set -eux; \
     microdnf -y update; \
-    microdnf -y install ca-certificates shadow-utils rpm ; \
-    rpm -Uvh --nodigest --nofiledigest \
-      https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm; \
-    crb enable || true; \
-    microdnf -y install --enablerepo=epel \
+    microdnf -y install ca-certificates shadow-utils; \
+    microdnf -y install \
       libjpeg-turbo \
       libpng \
       libtiff \
-      giflib \
       libwebp \
-      libheif \
-      libwebp-devel \
       brotli; \
     microdnf -y install curl-minimal || true; \
     microdnf -y clean all

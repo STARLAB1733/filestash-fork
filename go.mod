@@ -10,7 +10,7 @@ require (
 	github.com/cretz/bine v0.2.0
 	github.com/go-ldap/ldap/v3 v3.4.8
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/brotli/go/cbrotli v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
@@ -32,7 +32,7 @@ require (
 	github.com/tidwall/gjson v1.17.1
 	github.com/tidwall/sjson v1.2.5
 	github.com/vmware/go-nfs-client v0.0.0-20190605212624-d43b92724c1b
-	golang.org/x/crypto v0.31.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/image v0.16.0
 	golang.org/x/net v0.31.0
 	golang.org/x/oauth2 v0.24.0
