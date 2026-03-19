@@ -6,6 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.3.2
 	github.com/aws/aws-sdk-go v1.53.14
 	github.com/bluekeyes/go-gitdiff v0.7.3
+	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/creack/pty v1.1.21
 	github.com/cretz/bine v0.2.0
 	github.com/go-ldap/ldap/v3 v3.4.8
@@ -29,6 +30,7 @@ require (
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/suyashkumar/dicom v1.0.7
+	github.com/tetratelabs/wazero v1.11.0
 	github.com/tidwall/gjson v1.17.1
 	github.com/tidwall/sjson v1.2.5
 	github.com/vmware/go-nfs-client v0.0.0-20190605212624-d43b92724c1b
@@ -92,8 +94,8 @@ require (
 	go.opentelemetry.io/otel/metric v1.29.0 // indirect
 	go.opentelemetry.io/otel/trace v1.29.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
-	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241113202542-65e8d215514f // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241118233622-e639e219e697 // indirect
 	google.golang.org/grpc v1.67.2 // indirect
