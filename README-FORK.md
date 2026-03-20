@@ -71,4 +71,4 @@ For containerised local testing, use `docker/Dockerfile.local` which expects a p
 
 ## Deployment
 
-Deployment manifests and Helm charts are maintained in a separate repository. This repository contains only the application source and build tooling.
+Deployment manifests and Helm charts are maintained in a separate repository in starlab1733/starforging/services/stardrive/ repo. This repository contains only the application source and build tooling.
