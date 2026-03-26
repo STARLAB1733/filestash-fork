@@ -1,0 +1,10 @@
+{
+    "general": {},
+    "features": {},
+    "log": {},
+    "email": {},
+    "connections": [
+        {"label": "Local Storage", "type": "local"},
+        {"label": "S3", "type": "s3"}
+    ]
+}

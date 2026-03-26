@@ -10,5 +10,5 @@ import (
 var STATIC embed.FS
 
 func init() {
-	Hooks.Register.StaticPatch(STATIC)
+	Hooks.Register.Static(STATIC, "assets/")
 }

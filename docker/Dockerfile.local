@@ -1,14 +1,7 @@
-# STEP1: CLONE THE CODE
-FROM alpine/git AS builder_prepare
-WORKDIR /home/
-ARG GIT_REPO=https://github.com/STARLAB1733/filestash-fork
-ARG GIT_BRANCH=master_fork
-RUN git clone --depth 1 --single-branch --branch ${GIT_BRANCH} ${GIT_REPO} /home/filestash
-
-# STEP2: BUILD BACKEND
+# STEP1: BUILD BACKEND (from local source)
 FROM golang:1.25-trixie AS builder_backend
 WORKDIR /home/filestash/
-COPY --from=builder_prepare /home/filestash/ .
+COPY . .
 RUN apt-get update > /dev/null && \
     apt-get install -y curl make > /dev/null 2>&1 && \
     apt-get install -y libjpeg-dev libtiff-dev libpng-dev libwebp-dev libraw-dev libheif-dev libgif-dev libvips-dev > /dev/null 2>&1
@@ -18,7 +11,7 @@ RUN make init && \
     mkdir -p ./dist/data/state/config/ && \
     cp config/config.json ./dist/data/state/config/config.json
 
-# STEP3: BUILD PROD IMAGE
+# STEP2: BUILD PROD IMAGE
 FROM registry.access.redhat.com/ubi9-minimal:latest
 
 WORKDIR /app
