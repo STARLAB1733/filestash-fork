@@ -21,11 +21,10 @@ export default function(render) {
         const [msg, trace] = processError(err);
 
         const shouldRedirectLogin = err instanceof AjaxError && err.err().status === 401;
-        const shouldRedirectToLogin = err instanceof AjaxError && err.err().status === 404 && window.location.pathname.startsWith("/files");
         let link = "";
         if (hasBack) {
             link = forwardURLParams(calculateBacklink(fromHref(window.location.pathname)), ["share"]);
-            if (shouldRedirectLogin || shouldRedirectToLogin) {
+            if (shouldRedirectLogin) {
                 link = fromHref("/login?next=" + encodeURIComponent(forwardURLParams(fromHref(window.location.pathname), ["share"])));
             }
         }

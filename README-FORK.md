@@ -3,7 +3,7 @@
 ## Objective
 
 - Reduce CVEs by removing unused plugins and unnecessary OS-level dependencies
-- Rebuild image on `ubi9-minimal` base instead of the upstream Debian-based image
+- Rebuild image on `ubuntu:24.04` base instead of the upstream Debian-based image
 - Apply stardrive2.0 production plugin profile — only the backends and features needed are compiled in
 - Add support for S3 bucket configuration via environment variables
 
@@ -23,10 +23,9 @@ The notable files of interest are as follow,
 ├─ go.sum           # go dependencies checksum
 ├─ Makefile         # script mechanism to build frontend/backend
 ├─ docker
-│  ├─ Dockerfile        # production image (ubi9-minimal base, built from GitHub)
-│  ├─ Dockerfile.local  # local dev build variant (expects pre-built dist/)
-│  ├─ entrypoint.sh     # container startup script
-│  └─ default-config.json  # seed config applied on first run
+│  ├─ Dockerfile        # production image (ubuntu:24.04 base, built from GitHub)
+│  ├─ Dockerfile.local  # local dev build variant (builds from local source)
+│  └─ default-config.json  # minimal seed config for reference
 └─ server
    └─ plugin        # plugin folders
       ├─ plg_{plugins}
@@ -47,10 +46,9 @@ For containerised local testing, use `docker/Dockerfile.local` which expects a p
 ## Modifications from upstream
 
 ### Docker image
-- `docker/Dockerfile` — rebuilt on `registry.access.redhat.com/ubi9-minimal` base; installs only required runtime libs (`libjpeg-turbo`, `libpng`, `libtiff`, `giflib`, `libwebp`, `libheif`, `brotli`) via EPEL; removes unnecessary packages that introduced CVEs
-- `docker/Dockerfile.local` — local build variant for dev iteration without cloning from GitHub
-- `docker/entrypoint.sh` — startup script with config seeding logic; enforced LF line endings
-- `docker/default-config.json` — minimal default config seeded on first container start
+- `docker/Dockerfile` — rebuilt on `ubuntu:24.04` base with `golang:1.25-trixie` builder; runtime-only libs (no `-dev` packages); zero HIGH/CRITICAL CVEs per trivy scan
+- `docker/Dockerfile.local` — local build variant that builds directly from local source
+- `docker/default-config.json` — minimal config for reference; not automatically seeded
 
 ### Plugin minimization
 - `server/plugin/index.go` — disabled plugins not needed for production: OpenID, SAML, WebAuthn, Tor, and others with unresolved build dependencies; removed `plg_image_light` (CGO-based, replaced by `plg_image_vips`)
