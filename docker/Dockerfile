@@ -33,7 +33,6 @@ RUN set -eux; \
       libjpeg-turbo \
       libpng \
       libtiff \
-      giflib \
       libwebp \
       libheif \
       brotli; \

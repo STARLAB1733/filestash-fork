@@ -46,7 +46,7 @@ For containerised local testing, use `docker/Dockerfile.local` which builds from
 ## Modifications from upstream
 
 ### Docker image
-- `docker/Dockerfile` — multi-stage build: `golang:1.25-trixie` builder (Debian), `ubi9-minimal` runtime. Runtime libraries installed via an inline EPEL 9 repo file. `libarchive` is explicitly removed after `microdnf update` (CVE-2026-4111, HIGH). `golang:1.25-trixie` includes the fix for Go stdlib CVE-2026-25679 (HIGH, `net/url`).
+- `docker/Dockerfile` — multi-stage build: `golang:1.25-trixie` builder (Debian), `ubi9-minimal` runtime. Runtime libraries installed via an inline EPEL 9 repo file. `libarchive` is explicitly removed after `microdnf update` (CVE-2026-4111). `giflib` is not installed — `plg_image_c` (the only plugin with giflib CGO linkage) is disabled, so the library is not a runtime dependency. `golang:1.25-trixie` includes the fix for Go stdlib CVE-2026-25679. Zero HIGH/CRITICAL CVEs per trivy scan.
   - **amd64 only:** `libsharpyuv.so.0` is not packaged in UBI9 or EPEL. It is copied directly from the Debian builder stage (`/usr/lib/x86_64-linux-gnu/libsharpyuv.so.0`). Builds will fail on arm64.
 - `docker/Dockerfile.local` — local build variant. Same runtime stage; replaces the GitHub clone step with `COPY . .` to build from local source directly. No pre-built `dist/` required.
 - `docker/default-config.json` — minimal config for reference; not automatically seeded
