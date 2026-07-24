@@ -1,5 +1,5 @@
 # STEP1: BUILD BACKEND (from local source)
-FROM golang:1.25-trixie AS builder_backend
+FROM golang:1.26-trixie AS builder_backend
 WORKDIR /home/filestash/
 COPY . .
 RUN apt-get update > /dev/null && \
