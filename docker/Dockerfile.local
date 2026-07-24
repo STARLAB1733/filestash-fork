@@ -16,25 +16,22 @@ FROM registry.access.redhat.com/ubi9-minimal:latest
 
 WORKDIR /app
 
+# Runtime deps for the MINIMIZED plugin set (passthrough + local + s3 + starter_http):
+# the Go binary only links brotli (verified via `ldd /app/filestash`) and needs
+# ca-certificates for TLS trust. Image-processing libs (libjpeg/png/tiff/webp/heif/vips)
+# and libsharpyuv are intentionally omitted — they are not linked by this build, so
+# installing them would only add unused, CVE-bearing packages. curl/libcurl are removed
+# for the same reason (the binary uses Go net/http, not libcurl).
+# NOTE: if image plugins (plg_image_*, plg_video_transcoder) are re-enabled, restore the
+# EPEL repo + libjpeg-turbo/libpng/libtiff/libwebp/libheif + libsharpyuv here.
 RUN set -eux; \
     microdnf -y update; \
     rpm -e --nodeps libarchive 2>/dev/null || true; \
-    microdnf -y install ca-certificates shadow-utils; \
-    printf '[epel]\nname=EPEL 9\nmetalink=https://mirrors.fedoraproject.org/metalink?repo=epel-9&arch=$basearch\nenabled=1\ngpgcheck=0\n' \
-      > /etc/yum.repos.d/epel.repo; \
-    microdnf -y install \
-      libjpeg-turbo \
-      libpng \
-      libtiff \
-      libwebp \
-      libheif \
-      brotli; \
-    microdnf -y clean all
+    microdnf -y install ca-certificates shadow-utils brotli; \
+    microdnf -y clean all; \
+    rpm -e --nodeps curl-minimal libcurl-minimal 2>/dev/null || true
 
 COPY --from=builder_backend /home/filestash/dist/ .
-
-# libsharpyuv is not packaged for UBI/RHEL; copied from Debian builder (amd64 only)
-COPY --from=builder_backend /usr/lib/x86_64-linux-gnu/libsharpyuv.so.0 /usr/lib64/
 
 RUN useradd -u 1001 filestash; \
     mkdir -p /app/data; \
