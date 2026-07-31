@@ -30,6 +30,10 @@ import (
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_tmp"
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_url"
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_backend_webdav"
+
+	// New in upstream b48ed3c, not present in the fork before this rebase.
+	// Kept disabled to match the fork's minimized runtime (passthrough + local/s3 only).
+	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_editor_codemirror"
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_editor_wopi"
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_handler_console"
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_handler_mcp"
@@ -43,6 +47,7 @@ import (
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_security_svg"
 	_ "github.com/mickael-kerjean/filestash/server/plugin/plg_starter_http"
 	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_video_transcoder"
+	// _ "github.com/mickael-kerjean/filestash/server/plugin/plg_widget_console"
 )
 
 func init() {

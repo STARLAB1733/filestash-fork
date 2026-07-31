@@ -176,7 +176,7 @@ func init() {
 		can_print()
 	})
 
-	Hooks.Register.HttpEndpoint(func(r *mux.Router, app *App) error {
+	Hooks.Register.HttpEndpoint(func(r *mux.Router) error {
 		oods := r.PathPrefix("/onlyoffice").Subrouter()
 		oods.PathPrefix("/static/").HandlerFunc(StaticHandler).Methods("GET", "POST")
 		oods.HandleFunc("/event", OnlyOfficeEventHandler).Methods("POST")
@@ -593,7 +593,7 @@ func OnlyOfficeEventHandler(res http.ResponseWriter, req *http.Request) {
 			res.Write([]byte(`{"error": 1, "message": "couldn't fetch the document on the oods server"}`))
 			return
 		}
-		f, err := HTTPClient.Do(r)
+		f, err := HTTPClient().Do(r)
 		if err = cData.Save(cData.Path, f.Body); err != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			res.Write([]byte(`{"error": 1, "message": "error while saving the document"}`))

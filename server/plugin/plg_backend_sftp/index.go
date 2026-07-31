@@ -17,7 +17,7 @@ var SftpCache AppCache
 
 type Sftp struct {
 	SSHClient  *ssh.Client
-	SFTPClient *sftp.Client
+	SFTPClient *tracedClient
 	wg         *sync.WaitGroup
 }
 
@@ -74,6 +74,7 @@ func (s Sftp) Init(params map[string]string, app *App) (IBackend, error) {
 			<-app.Context.Done()
 			d.wg.Done()
 		}()
+		d.SFTPClient.app = app
 		return d, nil
 	}
 
@@ -169,22 +170,21 @@ func (s Sftp) Init(params map[string]string, app *App) (IBackend, error) {
 			return ErrNotValid
 		},
 	}
-
 	client, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
 		config.User = strings.ToLower(p.username)
 		client, err = ssh.Dial("tcp", addr, config)
 		if err != nil {
-			return &s, ErrAuthenticationFailed
+			return nil, ErrAuthenticationFailed
 		}
 	}
-	s.SSHClient = client
-
-	session, err := sftp.NewClient(s.SSHClient)
+	session, err := sftp.NewClient(client)
 	if err != nil {
-		return &s, err
+		client.Close()
+		return nil, err
 	}
-	s.SFTPClient = session
+	s.SSHClient = client
+	s.SFTPClient = &tracedClient{Client: session, app: app, hostname: addr, username: p.username}
 	s.wg = new(sync.WaitGroup)
 	s.wg.Add(1)
 	go func() {

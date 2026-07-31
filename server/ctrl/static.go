@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -324,6 +325,7 @@ var preload = [][]string{
 		"/assets/" + BUILD_REF + "/lib/vendor/rxjs/rxjs.min.js",
 		"/assets/" + BUILD_REF + "/lib/vendor/rxjs/rxjs-ajax.min.js",
 		"/assets/" + BUILD_REF + "/lib/vendor/rxjs/rxjs-shared.min.js",
+		"/assets/" + BUILD_REF + "/lib/chromecast.js",
 		"/assets/" + BUILD_REF + "/lib/store.js",
 		"/assets/" + BUILD_REF + "/lib/form.js",
 		"/assets/" + BUILD_REF + "/lib/path.js",
@@ -339,7 +341,6 @@ var preload = [][]string{
 
 		"/assets/" + BUILD_REF + "/locales/index.js",
 		"/assets/" + BUILD_REF + "/model/config.js",
-		"/assets/" + BUILD_REF + "/model/chromecast.js",
 		"/assets/" + BUILD_REF + "/model/session.js",
 		"/assets/" + BUILD_REF + "/model/plugin.js",
 
@@ -358,6 +359,7 @@ var preload = [][]string{
 		"/assets/" + BUILD_REF + "/pages/connectpage/model_config.js",
 		"/assets/" + BUILD_REF + "/pages/connectpage/ctrl_form_state.js",
 
+		"/assets/" + BUILD_REF + "/pages/filespage/cache.js",
 		"/assets/" + BUILD_REF + "/pages/filespage/thing.js",
 		"/assets/" + BUILD_REF + "/pages/filespage/thing.css",
 	},
@@ -365,13 +367,13 @@ var preload = [][]string{
 		"/assets/" + BUILD_REF + "/pages/ctrl_filespage.js",
 		"/assets/" + BUILD_REF + "/pages/ctrl_filespage.css",
 		"/assets/" + BUILD_REF + "/pages/filespage/model_acl.js",
-		"/assets/" + BUILD_REF + "/pages/filespage/cache.js",
 		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_filesystem.js",
 		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_filesystem.css",
 		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_upload.js",
 		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_upload.css",
 		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_newitem.js",
 		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_newitem.css",
+		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_move.js",
 	},
 	{
 		"/assets/" + BUILD_REF + "/pages/filespage/ctrl_submenu.js",
@@ -452,7 +454,7 @@ func ServeBundle() func(*App, http.ResponseWriter, *http.Request) {
 	}
 
 	quality := 11
-	if isDebug {
+	if isDebug || runtime.NumCPU() <= 4 {
 		quality = 8
 	}
 	chunks, chunksBr, chunksGzip, etags := buildChunks(quality)

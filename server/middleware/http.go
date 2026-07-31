@@ -16,6 +16,9 @@ func ApiHeaders(fn HandlerFunc) HandlerFunc {
 		header := res.Header()
 		header.Set("Content-Type", "application/json")
 		header.Set("Cache-Control", "no-cache")
+		if id := req.Header.Get("X-Request-ID"); id != "" {
+			header.Set("X-Request-ID", id)
+		}
 		fn(ctx, res, req)
 	})
 }
@@ -33,7 +36,7 @@ func PublicCORS(fn HandlerFunc) HandlerFunc {
 	return HandlerFunc(func(ctx *App, res http.ResponseWriter, req *http.Request) {
 		header := res.Header()
 		header.Set("Access-Control-Allow-Origin", "*")
-		header.Set("Access-Control-Allow-Headers", "x-requested-with")
+		header.Set("Access-Control-Allow-Headers", "x-requested-with, x-request-id")
 		if req.Method == http.MethodOptions {
 			header.Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 			res.WriteHeader(http.StatusNoContent)

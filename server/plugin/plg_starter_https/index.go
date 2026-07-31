@@ -8,10 +8,12 @@ import (
 	"time"
 
 	. "github.com/mickael-kerjean/filestash/server/common"
-	"github.com/mickael-kerjean/filestash/server/common/ssl"
+	"github.com/mickael-kerjean/filestash/server/pkg/ssl"
 
 	"github.com/gorilla/mux"
 )
+
+var httpclient *http.Client
 
 func init() {
 	Hooks.Register.Starter(func(ctx context.Context, r *mux.Router) {
@@ -31,7 +33,9 @@ func init() {
 			return
 		}
 		srv.TLSConfig.Certificates = []tls.Certificate{TLSCert}
-		HTTPClient.Transport.(*TransformedTransport).Orig.(*http.Transport).TLSClientConfig = &tls.Config{
+
+		httpclient = HTTPClient()
+		httpclient.Transport.(*TransformedTransport).Orig.(*http.Transport).TLSClientConfig = &tls.Config{
 			RootCAs: roots,
 		}
 		HTTP.Transport.(*TransformedTransport).Orig.(*http.Transport).TLSClientConfig = &tls.Config{
@@ -60,7 +64,7 @@ func ensureAppHasBooted(address string, message string) {
 			break
 		}
 		time.Sleep(250 * time.Millisecond)
-		res, err := HTTPClient.Get(address)
+		res, err := httpclient.Get(address)
 		if err != nil {
 			continue
 		}

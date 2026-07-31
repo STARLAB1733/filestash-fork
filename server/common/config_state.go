@@ -21,25 +21,16 @@ import (
 	"os"
 )
 
-var (
-	configKeysToEncrypt []string = []string{
-		"middleware.identity_provider.params",
-		"middleware.attribute_mapping.params",
-	}
-	config_path func() string
-)
-
-func init() {
-	config_path = func() string {
-		return GetAbsolutePath(CONFIG_PATH, "config.json")
-	}
+var configKeysToEncrypt []string = []string{
+	"middleware.identity_provider.params",
+	"middleware.attribute_mapping.params",
 }
 
 func LoadConfig() ([]byte, error) {
-	file, err := os.OpenFile(config_path(), os.O_RDONLY, os.ModePerm)
+	file, err := os.OpenFile(GetAbsolutePath(CONFIG_PATH, "config.json"), os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.MkdirAll(GetAbsolutePath(CONFIG_PATH), os.ModePerm)
+			os.MkdirAll(GetAbsolutePath(CONFIG_PATH), 0770)
 			return []byte(""), nil
 		}
 		return nil, err
@@ -50,18 +41,20 @@ func LoadConfig() ([]byte, error) {
 		return nil, err
 	}
 	configStr := string(cFile)
+	if os.Getenv("CONFIG_SECRET") == "" {
+		InitSecretDerivate(gjson.Get(configStr, "general.secret_key").String())
+	}
+	key := defaultValue(SECRET_KEY_DERIVATE_FOR_PROOF, "CONFIG_SECRET")
 	for _, jsonPathWithEncryptedData := range configKeysToEncrypt {
 		p := gjson.Get(configStr, jsonPathWithEncryptedData).String()
 		if p == "" {
 			continue
 		}
-		key := os.Getenv("CONFIG_SECRET")
-		if key == "" {
-			InitSecretDerivate(gjson.Get(configStr, "general.secret_key").String())
-			key = SECRET_KEY_DERIVATE_FOR_PROOF
-		}
 		t, err := DecryptString(Hash(key, 16), p)
 		if err != nil {
+			if !defaultValue(true, "CONFIG_ENCRYPT") {
+				break
+			}
 			Log.Warning("common::config_state::load cannot decrypt config path '%s': %s", jsonPathWithEncryptedData, err.Error())
 			continue
 		}
@@ -76,20 +69,24 @@ func LoadConfig() ([]byte, error) {
 }
 
 func SaveConfig(v []byte) error {
-	file, err := os.Create(config_path())
+	file, err := os.OpenFile(GetAbsolutePath(CONFIG_PATH, "config.json"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0660)
 	if err != nil {
 		return fmt.Errorf(
 			APPNAME+" needs to be able to create and edit its configuration, but it currently cannot. "+
 				"Change the permissions to allow writing to `%s`",
-			config_path(),
+			GetAbsolutePath(CONFIG_PATH, "config.json"),
 		)
 	}
 
 	configStr := string(v)
+
+	var (
+		key       = defaultValue(SECRET_KEY_DERIVATE_FOR_PROOF, "CONFIG_SECRET")
+		toEncrypt = defaultValue(true, "CONFIG_ENCRYPT")
+	)
 	for _, jsonPathWithEncryptedData := range configKeysToEncrypt {
-		key := os.Getenv("CONFIG_SECRET")
-		if key == "" {
-			key = SECRET_KEY_DERIVATE_FOR_PROOF
+		if !toEncrypt {
+			continue
 		}
 		p := gjson.Get(configStr, jsonPathWithEncryptedData).String()
 		if p == "" {
@@ -113,4 +110,15 @@ func SaveConfig(v []byte) error {
 		return err
 	}
 	return file.Close()
+}
+
+func init() {
+	Hooks.Register.Onload(func() {
+		if err := os.Chmod(GetAbsolutePath(CONFIG_PATH), 0770); err != nil && os.IsNotExist(err) == false {
+			Log.Warning("common::config_state::onload cannot chmod config directory: %s", err.Error())
+		}
+		if err := os.Chmod(GetAbsolutePath(CONFIG_PATH, "config.json"), 0660); err != nil && os.IsNotExist(err) == false {
+			Log.Warning("common::config_state::onload cannot chmod config file: %s", err.Error())
+		}
+	})
 }

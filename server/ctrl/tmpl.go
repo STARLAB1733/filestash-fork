@@ -85,6 +85,8 @@ var tmplFuncs = template.FuncMap{
 			input = opts[1]
 		}
 		switch in := input.(type) {
+		case nil:
+			return false, nil
 		case string:
 			splits := strings.Split(in, ",")
 			for _, split := range splits {
@@ -239,10 +241,10 @@ var tmplFuncs = template.FuncMap{
 			return fmt.Sprintf("%v", val), nil
 		}
 	},
-	"toLower": func(data string) (string, error) {
-		return strings.ToLower(data), nil
+	"splitList": func(sep string, s string) []string {
+		return strings.Split(s, sep)
 	},
-	"toUpper": func(data string) (string, error) {
-		return strings.ToUpper(data), nil
-	},
+	"toLower": strings.ToLower,
+	"toUpper": strings.ToUpper,
+	"trim":    strings.TrimSpace,
 }

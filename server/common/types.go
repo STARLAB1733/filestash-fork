@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/mickael-kerjean/filestash/server/pkg/tracer"
 )
 
 type IBackend interface {
@@ -68,6 +70,9 @@ type AuditQueryResult struct {
 	RenderHTML string `json:"render"`
 }
 
+type ITracer = tracer.ITracer
+type ISpan = tracer.ISpan
+
 const (
 	MetaModeTag = 1 << iota
 	MetaModeBookmark
@@ -115,12 +120,13 @@ type WorkflowSpecs struct {
 }
 
 type File struct {
-	FName   string `json:"name"`
-	FType   string `json:"type"`
-	FTime   int64  `json:"time"`
-	FSize   int64  `json:"size"`
-	FPath   string `json:"path,omitempty"`
-	Offline bool   `json:"offline,omitempty"`
+	FName    string `json:"name"`
+	FType    string `json:"type"`
+	FTime    int64  `json:"time"`
+	FSize    int64  `json:"size"`
+	FPath    string `json:"path,omitempty"`
+	Offline  bool   `json:"offline,omitempty"`
+	Metadata any    `json:"metadata,omitempty"`
 }
 
 func (f File) Name() string {
