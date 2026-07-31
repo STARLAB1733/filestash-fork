@@ -1,20 +1,22 @@
-# Session Handoff — Filestash upstream upgrade (`b48ed3c`)
+# Session Handoff — Filestash upstream upgrade (`b48ed3c` → `cdcb9566`)
 
 Self-contained context to resume this upgrade from a fresh client. Pair with `UPGRADE-NOTES.md`
 (the upgrade guide) and `STARLAB1733/starforging` → `services/stardrive/docs/operations/upgrading.md`
-(authoritative process). Last updated 2026-07-24.
+(authoritative process). Last updated 2026-07-31.
 
 ## Status at handoff
 
 | Step | State |
 |---|---|
 | Rebase `fork` (2 custom commits) onto latest upstream `b48ed3c1` | ✅ done — 6 conflicts resolved |
+| Extend rebase to new upstream tip `cdcb9566` (3 more upstream commits) | ✅ done 2026-07-31 — 0 conflicts |
 | Compile / image build (`docker/Dockerfile.local`, Go 1.26) | ✅ builds & runs |
-| Trivy CVE gate (0 HIGH/CRITICAL) | ✅ passed (after lib minimization) |
-| Test image on Docker Hub | ✅ `waahhaa/filestash:upgrade-b48ed3c-test` |
+| Trivy CVE gate (0 HIGH/CRITICAL) | ✅ passed (after lib minimization; re-verified at `cdcb9566`) |
+| Test image on Docker Hub | ✅ `waahhaa/filestash:upgrade-b48ed3c-test` (updated digest, see below) |
 | Auth-passthrough / functional / state-migration tests | ⬜ pending — need CRC/Istio/Keycloak/MinIO env |
-| Decision: enable `plg_editor_codemirror` / `plg_widget_console`? | ⬜ pending — currently disabled |
+| Decision: enable `plg_editor_codemirror` / `plg_widget_console`? | ✅ resolved 2026-07-31 — not required by core, kept disabled |
 | Promote to prod (`master_fork`, tag, GitOps) | ⬜ not started |
+| Push updated branch to `origin/upgrade/upstream-b48ed3c` | ✅ done 2026-07-31 |
 
 ## Branch / repo state
 
@@ -22,23 +24,25 @@ Self-contained context to resume this upgrade from a fresh client. Pair with `UP
 - **Working branch `upgrade/upstream-b48ed3c`** (this branch) = the rebased + hardened + documented tree,
   tip built the pushed image. Layout (top → base):
   ```
+  <docs>   docs: build/scan results + CVE hardening (extended to cdcb9566)
   <docs>   docs: build/scan results + CVE hardening
   <fix>    harden(docker): mirror runtime lib minimization to prod Dockerfile
   <fix>    harden(docker): drop unused image libs + curl (clears 13 HIGH CVEs)
   <fix>    fix(docker): bump Dockerfile.local builder to golang:1.26
-  4cfd5cb1 feat: stardrive2.0 ... (custom commit 2, replayed)
-  7948dc79 Squashed refactor ... (custom commit 1, replayed)
-  b48ed3c1 upstream tip (= origin/master = upstream/master)
+  ...      feat: stardrive2.0 ... (custom commit 2, replayed)
+  ...      Squashed refactor ... (custom commit 1, replayed)
+  cdcb9566 upstream tip (= origin/master = upstream/master, was b48ed3c1)
   ```
 - Branch model: `master` mirrors latest upstream (sync via GitHub "Sync fork"); `fork` = prod.
   Upgrade = replay the 2 custom commits onto `master`, then promote. **Do not** treat `master` as prod.
-- Prod `fork` and the un-rebased history were **not** modified. (Previous remote tip of this branch,
-  `b6254bcf`, was replaced via `--force-with-lease`; recoverable from reflog if ever needed.)
+- Prod `fork` and the un-rebased history were **not** modified. History of this branch was rewritten
+  again on 2026-07-31 (rebase onto new upstream tip) and force-pushed; recoverable from reflog if needed.
 
 ## Test image
 
 - `waahhaa/filestash:upgrade-b48ed3c-test`
-- digest `sha256:5aff06e8350e1b9e8e30324207f97bbd5f081af2812a2df931bcc9806a3b7cfe`
+- digest `sha256:cafad7d14032e7517d5e2309071a63fc7ccbff9c92a568f5f55274b988785243` (updated 2026-07-31;
+  supersedes prior `sha256:5aff06e8...`)
 - 234 MB, UBI9-minimal, non-root `1001:0`, `EXPOSE 8334`. Enabled plugins: passthrough auth, local, s3, starter_http.
 
 ## Tooling on the build host
@@ -82,6 +86,6 @@ docker push waahhaa/filestash:upgrade-b48ed3c-test
 
 1. Deploy `waahhaa/filestash:upgrade-b48ed3c-test` in the CRC harness; run auth-passthrough + functional
    (local + S3) + state-migration gates (see `UPGRADE-NOTES.md`).
-2. Decide on `plg_editor_codemirror` / `plg_widget_console` (edit `server/plugin/index.go`, rebuild).
-3. On green: promote per `upgrading.md` — land commits on `master_fork`, tag a MINOR bump, `docker save`
+2. On green: promote per `upgrading.md` — land commits on `master_fork`, tag a MINOR bump, `docker save`
    tar, GitOps (chart `appVersion` + image tag → helm-charts + argohub → MR → ArgoCD sync).
+3. Watch for further upstream movement past `cdcb9566`; re-run this same rebase+build+scan cycle if so.

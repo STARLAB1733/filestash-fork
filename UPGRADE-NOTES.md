@@ -1,7 +1,27 @@
-# Filestash Fork — Upgrade Notes (upstream `b48ed3c`)
+# Filestash Fork — Upgrade Notes (upstream `b48ed3c` → `cdcb9566`)
 
 > Authoritative process doc: `STARLAB1733/starforging` → `services/stardrive/docs/operations/upgrading.md`.
 > If this file disagrees with it, **`upgrading.md` wins.**
+
+## Update (2026-07-31): extended to upstream `cdcb9566`
+
+`origin/master` was synced further past `b48ed3c1` to upstream's new tip **`cdcb9566`** (3 commits:
+`6ed44484` sqlitefts global flag, `581f986d` nfs metadata, `cdcb9566` widget_console shortcut fix — all
+in plugins already **disabled** in the minimized registry, none touch `passthrough`/`local`/`s3`/`starter_http`
+or core). Extended this branch: `git rebase upstream/master` from the previous tip (`ad1cc91f`) —
+**0 conflicts**. Re-ran the full build + CVE gate:
+
+- ✅ Compiles, runs (`/` → 307).
+- ✅ Trivy: **0 HIGH / 0 CRITICAL** (OS layer + Go binary), image still **234 MB** — lib-minimization fix
+  still holds, no new HIGH/CRITICAL introduced by the 3 upstream commits.
+- ✅ `plg_editor_codemirror` / `plg_widget_console` confirmed **not required** by core (core self-registers
+  plugins via `init()`, UI served by `server/ctrl/static.go` independent of plugins) → **kept disabled**,
+  closing open item 4 below.
+- Updated test image pushed: `waahhaa/filestash:upgrade-b48ed3c-test`
+  (digest `sha256:cafad7d14032e7517d5e2309071a63fc7ccbff9c92a568f5f55274b988785243`).
+
+Everything below this point describes the original 2026-07-24 rebase (fork commits onto `b48ed3c1`); it
+still applies verbatim except where noted above.
 
 ## Branch model
 
@@ -99,4 +119,5 @@ validation). Back up the state PVC first; smoke test against **real** PureStorag
 1. PureStorage S3: path-style vs virtual-host? private CA in use (drives `caBundle` + MinIO fidelity)?
 2. Prod-like state PVC snapshot for the migration test.
 3. CRC Istio install: Service Mesh operator vs istioctl?
-4. Enable `plg_editor_codemirror` / `plg_widget_console`, or keep disabled?
+4. ~~Enable `plg_editor_codemirror` / `plg_widget_console`, or keep disabled?~~ **Resolved 2026-07-31:**
+   not required by core → kept disabled.
